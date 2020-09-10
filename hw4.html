@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<head>
+<title>HW4</title>
+<script>
+function loadJSON(url)
+{
+    request =new XMLHttpRequest();
+	request.open("GET",url,false);
+	request.send();
+	if (request.status==0||request.status==200)
+	{
+		jsonDoc = request.responseText;
+		jsonDoc = JSON.parse(jsonDoc);
+		return jsonDoc;
+	}
+	else
+	{
+		alert("File does not exist!");
+		return null;
+	}
+
+}
+function HTML(jsonDoc)   
+{
+    if(typeof(jsonDoc.Mainline.Table.Row)==='undefined')
+	{
+		alert("No buildings!");
+        return 0;
+	}
+        
+	else
+	{
+		htmltext="<html><head><title>JSON table</title></head><body><table border='1'><tr>";
+		var headerlist=jsonDoc.Mainline.Table.Header.Data;
+		var headerarray=Object.keys(headerlist);
+		for(i = 0; i < headerarray.length; i++)
+		{
+			htmltext+="<th>"+headerlist[i]+"</th>";
+		}
+		htmltext+="</tr>";
+	}
+	var buildinglist = jsonDoc.Mainline.Table.Row;
+	for(i=0;i<buildinglist.length;i++)
+	{
+		htmltext+="<tr>";
+		var data = buildinglist[i];
+        var buildingarray = Object.keys(data);
+        for (j =0; j<buildingarray.length;j++)
+			{
+                row = buildingarray[j];
+                if(row == "Hubs")
+				{
+                    var hublist = data[row];
+                    var hubarray = Object.keys(hublist);
+     				var hubs = hubarray[0];
+     				htmltext += "<td><ul>";
+     				for(var m in hublist[hubs]) 
+					{
+						if (m == 0) 
+						{
+							htmltext+= "<li><b>"+hublist[hubs][m]+"</b></li>";
+                        } 
+						else 
+						{
+                            htmltext+= "<li>"+hublist[hubs][m]+"</li>";
+                        }
+					}
+                    htmltext+="</ul></td>";      
+                }  
+                if(row == "HomePage")
+				{
+                    htmltext+= "<td><a href='"+ data[row]+"'/>"+ data[row]+"</td>";
+                }
+				if(row == "Logo")
+				{
+					htmltext+= "<td><img src='"+ data[row]+"'height='155' width='310'></img></td>";
+                }				   
+				if(row == "Rank" || row == "Name" || row == "Height")
+			    {
+                    htmltext+= "<td>"+data[row]+"</td>";
+                }
+        }       
+		htmltext+="</tr>";
+    }
+	htmltext+="</table></body></html>";
+	return 1;
+}
+function process(inputtext){
+	var URL = inputtext.json.value;
+	jsonDoc = loadJSON(URL); 
+	if(jsonDoc == null){
+		return;
+	}
+	jsonDoc.onload=HTML(jsonDoc);
+	if(jsonDoc.onload==0)
+	{
+		alert("Something wrong with the json file!");
+		return;
+	}
+	newhtml = window.open("", "Assignment4", "height=800", "width=600");
+	newhtml.document.write(htmltext);
+	newhtml.document.close();  
+}
+</script>			
+</head>		
+<body>
+<h2>Enter URL for list of tallest buildings JSON File</h2>
+<form method="GET">
+<input type="text" name="json" value="" required></input>
+<br>
+<button type="button" onclick="process(this.form)">Submit Query</button>           
+</form>
+<style>
+	body{
+		text-align:center;
+		padding-top: 100px;
+	}
+	button{
+		margin-top: 20px;
+	}
+</style>
+</body>
+</html>
